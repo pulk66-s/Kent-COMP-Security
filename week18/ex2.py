@@ -90,10 +90,6 @@ class ClientB(Client):
         encrypted_message = encrypt(str(nonce), self.keyAB)
         clientA.receive_answer(encrypted_message)
 
-class Attacker(ClientA):
-    def __init__(self, server):
-        super().__init__(server, "C")
-
 def normal_work():
     server = Server()
     clientA = ClientA(server)
@@ -103,24 +99,8 @@ def normal_work():
     clientA.ask_connection(clientB)
     clientA.send_random_message(clientB)
 
-def attack_work():
-    server = Server()
-    clientA = ClientA(server)
-    clientB = ClientB(server)
-    attacker = Attacker(server)
-
-    print("====")
-    clientA.ask_connection(clientB)
-    attacker.id = clientA.id
-    attacker.keyAB = clientA.keyAB
-
-    attacker.send_random_message(clientB)
-    
-
 def main():
     normal_work()
-    print("====")
-    attack_work()
 
 if __name__ == "__main__":
     main()

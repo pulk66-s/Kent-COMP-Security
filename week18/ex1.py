@@ -2,16 +2,17 @@ from bitstring import BitArray
 import hmac
 import hashlib
 
-# def hmac_encrypt_16bit(key, message):
-#     return hmac.new(key.encode("utf-8"), message.encode("utf-8"), hashlib.sha256).hexdigest()[0:16]
-
 def hmac_encrypt_16bit(key, message):
+    """Returns the HMAC of the message.
+    Parameters:
+        key: secret key used to encrypt the message.
+        message: The message to encrypt.
+    """
     hash_algorithm = hashlib.sha256
     hmac_obj = hmac.new(key.encode("utf-8"), message.encode("utf-8"), hash_algorithm)
 
     # Truncate the HMAC to 16 bits
     truncated_hmac = hmac_obj.digest()[:2]
-
     return truncated_hmac
 
 def hmac_verify_16bit(key, message, tag):
@@ -35,9 +36,8 @@ def eve_brute_force(key, message):
     She can't change the tag, but she can change the message. to test all
     """
     new_message = message + "Eve was here!"
-    for i in range(2 ** 15):
+    for i in range(2 ** 16):
         new_tag = i.to_bytes(2, byteorder="big")
-        # print(new_tag)
         if hmac_verify_16bit(key, new_message, new_tag):
             print("Found tag:", new_tag)
             return True
@@ -54,30 +54,26 @@ def password_guessing_attack(message, tag):
     return None
 
 def main():
+    # Message to send
     message = "Hello, world! This is a very long message."
-
-    # Generate a key.
+    # Secret key
     key = "5"
-
-    # Encrypt the message.
+    # generate hmac
     tag = hmac_encrypt_16bit(key, message)
     print("Tag:", tag, BitArray(hex=tag.hex()).bin)
-
-    # tag = hmac_encrypt_16bit(key, message)
-    # # print the tag in binary
-    # print("Tag:", tag, BitArray(hex=tag.hex()).bin, len(BitArray(hex=tag.hex()).bin))
-
-    # Verify the tag.
+    # eve interception
+    message = "This message has been intercepted by Eve!"
+    # verification
     print("Verified:", hmac_verify_16bit(key, message, tag))
 
-    # Eve tries to manipulate the message.
-    print("Eve's manipulation:", eve_manipulation(key, message, tag))
+    # # Eve tries to manipulate the message.
+    # print("Eve's manipulation:", eve_manipulation(key, message, tag))
 
-    # Eve tries to brute force the message.
-    print("Eve's brute force:", eve_brute_force(key, message))
+    # # Eve tries to brute force the message.
+    # print("Eve's brute force:", eve_brute_force(key, message))
 
-    # Eve tries to guess the password.
-    print("Eve's password guessing attack:", password_guessing_attack(message, tag))
+    # # Eve tries to guess the password.
+    # print("Eve's password guessing attack:", password_guessing_attack(message, tag))
 
 if __name__ == "__main__":
     main()
